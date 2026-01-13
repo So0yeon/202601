@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>새학기 첫날, 나의 선택은?</title>
+    <!-- 폰트: 배달의민족 주아체 -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #FFD93D;
+            --text-color: #333;
+            --bg-color: #f0f8ff;
+            --bar-bg: #e0e0e0;
+            --stat-care: #FF6B6B;   /* 배려 - 빨강 */
+            --stat-respect: #4D96FF; /* 존중 - 파랑 */
+            --stat-coop: #6BCB77;    /* 협력 - 초록 */
+            --stat-mind: #FFB347;    /* 마음 - 주황 */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Jua', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            /* 모바일에서 터치 지연 방지 */
+            touch-action: manipulation;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .hidden { display: none !important; }
+        .screen {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* 버튼 스타일 */
+        .btn {
+            background: var(--primary-color);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            width: 100%;
+            margin: 10px 0;
+            box-shadow: 0 4px 0 #E6C229;
+            position: relative;
+        }
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        .btn:disabled {
+            background: #ccc;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-choice {
+            background: white;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 4px 0 #eee;
+            text-align: left;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+        .btn-choice:hover:not(:disabled) {
+            background: #fff9db;
+        }
+
+        /* 1. 시작 화면 */
+        #start-screen {
+            justify-content: center;
+            background: linear-gradient(180deg, #fff 0%, #e6f7ff 100%);
+        }
+        .title-box { margin-bottom: 40px; }
+        .title-box h1 {
+            font-size: 2.5rem;
+            color: #4D96FF;
+            text-shadow: 2px 2px 0 #fff;
+        }
+        .input-group { width: 100%; margin-bottom: 20px; }
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        /* 캐릭터 선택 그리드 (2x2) */
+        .char-select {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 300px; /* 너무 커지지 않게 제한 */
+        }
+        .char-option {
+            aspect-ratio: 1; /* 정사각형 유지 */
+            border: 4px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.3s;
+            background-size: cover;
+            background-position: center;
+            background-color: #eee;
+            position: relative;
+        }
+        .char-option.selected {
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+            z-index: 1;
+            box-shadow: 0 0 15px rgba(255, 217, 61, 0.5);
+        }
+
+        /* 2. 게임 화면 헤더 (스탯) */
+        #game-header {
+            width: 100%;
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            background: rgba(255,255,255,0.98);
+            z-index: 50;
+            border-bottom: 1px solid #eee;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .stat-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 15px;
+            padding: 0 15px;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            position: relative; /* 플로팅 텍스트 위치 기준 */
+        }
+        .stat-label { width: 35px; font-weight: bold; }
+        .progress-bg {
+            flex: 1;
+            height: 12px;
+            background: var(--bar-bg);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 0 8px;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 50%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .stat-value {
+            width: 30px;
+            text-align: right;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.85rem;
+        }
+
+        /* 점수 변동 플로팅 애니메이션 */
+        .stat-float {
+            position: absolute;
+            right: 40px; /* 숫자 근처 */
+            top: -5px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            text-shadow: 1px 1px 0 #fff;
+            z-index: 100;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-20px); opacity: 0; }
+        }
+        .plus { color: #2ecc71; }
+        .minus { color: #e74c3c; }
+
+        #scene-area {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .scene-img-box {
+            width: 100%;
+            height: 250px;
+            background-color: #eee;
+            border-radius: 15px;
+            margin: 15px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .scene-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 5s ease; /* 미세한 줌 효과 */
+        }
+        /* 이미지 줌인 애니메이션 */
+        .zoom-in .scene-img { transform: scale(1.1); }
+
+        .scene-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            word-break: keep-all;
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            min-height: 80px; /* 텍스트 높이 확보 */
+        }
+        
+        .dark-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 5;
+        }
+        .dark-mood .dark-overlay { opacity: 1; }
+
+        /* 3. 엔딩 화면 */
+        #ending-card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            border: 3px solid #eee;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .ending-title { font-size: 1.8rem; color: #333; margin: 15px 0; }
+        .ending-desc { font-size: 1.1rem; color: #555; margin-bottom: 20px; line-height: 1.6; white-space: pre-line; }
+        .final-score-box { background: #f9f9f9; padding: 15px; border-radius: 10px; margin-top: 15px; }
+        .score-text { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }
+
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- 1. 시작 화면 -->
+    <div id="start-screen" class="screen">
+        <div class="title-box">
+            <p style="font-size: 1.2rem; margin-bottom: 10px;">두근두근 새학기</p>
+            <h1>나의 학교생활<br>선택 게임</h1>
+        </div>
+
+        <div class="input-group">
+            <p style="margin-bottom: 10px;">이름을 알려줘!</p>
+            <input type="text" id="player-name" placeholder="여기에 이름을 입력해" maxlength="6">
+        </div>
+
+        <div class="input-group">
+            <p style="margin-bottom: 10px;">캐릭터를 선택해줘! (총 4명)</p>
+            <div class="char-select">
+                <!-- 이미지 파일 이름은 char_01.png ~ char_04.png 로 저장해주세요 -->
+                <div class="char-option" id="char-01" onclick="selectChar('01')" style="background-image: url('./images/char_01.png');"></div>
+                <div class="char-option" id="char-02" onclick="selectChar('02')" style="background-image: url('./images/char_02.png');"></div>
+                <div class="char-option" id="char-03" onclick="selectChar('03')" style="background-image: url('./images/char_03.png');"></div>
+                <div class="char-option" id="char-04" onclick="selectChar('04')" style="background-image: url('./images/char_04.png');"></div>
+            </div>
+        </div>
+
+        <button class="btn" onclick="startGame()">등교하기!</button>
+    </div>
+
+    <!-- 2. 게임 진행 화면 -->
+    <div id="game-screen" class="screen hidden">
+        <div id="game-header">
+            <div class="stat-container">
+                <!-- 배려 -->
+                <div class="stat-item" id="stat-box-care">
+                    <span class="stat-label">배려</span>
+                    <div class="progress-bg"><div id="bar-care" class="progress-bar" style="background: var(--stat-care);"></div></div>
+                    <span id="val-care" class="stat-value">50</span>
+                </div>
+                <!-- 존중 -->
+                <div class="stat-item" id="stat-box-respect">
+                    <span class="stat-label">존중</span>
+                    <div class="progress-bg"><div id="bar-respect" class="progress-bar" style="background: var(--stat-respect);"></div></div>
+                    <span id="val-respect" class="stat-value">50</span>
+                </div>
+                <!-- 협력 -->
+                <div class="stat-item" id="stat-box-coop">
+                    <span class="stat-label">협력</span>
+                    <div class="progress-bg"><div id="bar-coop" class="progress-bar" style="background: var(--stat-coop);"></div></div>
+                    <span id="val-coop" class="stat-value">50</span>
+                </div>
+                <!-- 마음 -->
+                <div class="stat-item" id="stat-box-mind">
+                    <span class="stat-label">마음</span>
+                    <div class="progress-bg"><div id="bar-mind" class="progress-bar" style="background: var(--stat-mind);"></div></div>
+                    <span id="val-mind" class="stat-value">50</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="scene-area">
+            <div class="scene-img-box" id="scene-box">
+                <img id="scene-img" class="scene-img" src="" alt="장면 이미지" onerror="this.src='https://via.placeholder.com/500x250?text=No+Image'">
+                <div class="dark-overlay"></div>
+            </div>
+            <p id="scene-text" class="scene-text">장면 설명이 여기에 나옵니다.</p>
+            
+            <div id="choices-container" style="width: 100%;">
+                <!-- 버튼이 JS로 생성됨 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 엔딩 화면 -->
+    <div id="ending-screen" class="screen hidden">
+        <div id="ending-card">
+            <div class="scene-img-box" style="height: 200px;">
+                <img id="ending-img" class="scene-img" src="" alt="엔딩" onerror="this.src='https://via.placeholder.com/500x200?text=Ending'">
+            </div>
+            <h2 id="ending-title" class="ending-title">엔딩 제목</h2>
+            <p id="ending-desc" class="ending-desc">엔딩 내용</p>
+            
+            <div class="final-score-box">
+                <p><span id="final-name"></span>님의 학교생활 점수는?</p>
+                <div class="score-text"><span id="total-score">0</span>점</div>
+            </div>
+        </div>
+        
+        <button class="btn" onclick="saveEndingImage()">📸 추억 저장하기 (이미지)</button>
+        <button class="btn" style="background-color: #eee;" onclick="location.reload()">🔄 처음부터 다시하기</button>
+    </div>
+    
+    <div id="toast">이미지로 저장되었습니다!</div>
+</div>
+
+<script>
+    // --- 게임 데이터 설정 ---
+    const startStats = 50;
+    let currentScene = 0;
+    let player = { name: "", char: "" };
+    let stats = { care: startStats, respect: startStats, coop: startStats, mind: startStats };
+
+    // 12개 장면 데이터
+    const scenes = [
+        {
+            text: "새학기 첫 등교길! 학교 앞 횡단보도에서 저학년 동생이 실내화 가방을 떨어뜨렸어. 어떻게 할까?",
+            image: "./images/bg_01.jpg",
+            choices: [
+                { text: "얼른 뛰어가서 같이 주워준다.", effects: { care: 10, mind: 5 } },
+                { text: "뒤에 차가 오는지 봐주며 기다려준다.", effects: { care: 5, respect: 3 } },
+                { text: "지각하겠어! 모른 척 지나간다.", effects: { care: -5, mind: -2 } }
+            ]
+        },
+        {
+            text: "교실에 들어왔어. 담임 선생님이 반갑게 인사를 건네시네?",
+            image: "./images/bg_02.jpg",
+            choices: [
+                { text: "큰 소리로 '안녕하세요!' 배꼽 인사를 한다.", effects: { respect: 10, mind: 5 } },
+                { text: "눈을 마주치며 가볍게 목례한다.", effects: { respect: 5 } },
+                { text: "부끄러워서 고개를 숙이고 자리로 간다.", effects: { mind: -3, respect: -2 } }
+            ]
+        },
+        {
+            text: "1교시 수업 시간, 선생님 말씀이 조금 어렵네. 집중이 잘 안 되는데...",
+            image: "./images/bg_03.jpg",
+            choices: [
+                { text: "허리를 펴고 선생님 눈을 보며 끝까지 듣는다.", effects: { respect: 10, mind: 5 } },
+                { text: "중요한 내용만 노트에 끄적여 본다.", effects: { mind: 3 } },
+                { text: "몰래 책상 밑으로 딴짓을 한다.", effects: { respect: -10, mind: -5 } }
+            ]
+        },
+        {
+            text: "쉬는 시간! 복도에서 친구들이 뛰어다니며 장난을 치고 있어.",
+            image: "./images/bg_04.jpg",
+            choices: [
+                { text: "'얘들아, 복도에서는 조용히 걷자'고 말한다.", effects: { coop: 10, respect: 5 } },
+                { text: "부딪히지 않게 조심히 피해 다닌다.", effects: { care: 3 } },
+                { text: "신난다! 나도 같이 뛰면서 논다.", effects: { respect: -8, coop: -5 } }
+            ]
+        },
+        {
+            text: "간식 시간, 짝꿍이 우유를 책상에 쏟았어! 어쩌지?",
+            image: "./images/bg_05.jpg",
+            choices: [
+                { text: "내 휴지를 꺼내서 같이 닦아준다.", effects: { care: 12, coop: 8 } },
+                { text: "선생님께 말씀드리고 걸레를 가져온다.", effects: { coop: 5, care: 5 } },
+                { text: "'아 뭐야~' 하며 책상을 멀리 뗀다.", effects: { care: -10, mind: -5 } }
+            ]
+        },
+        {
+            text: "체육관으로 이동하는 시간. 줄을 서서 가야 하는데 자꾸 뒤에서 미네.",
+            image: "./images/bg_06.jpg",
+            choices: [
+                { text: "뒤를 돌아보며 '밀지 말고 천천히 가자'고 한다.", effects: { respect: 8, coop: 5 } },
+                { text: "아무 말 없이 내 앞사람과의 간격을 지킨다.", effects: { mind: 5 } },
+                { text: "짜증나서 나도 뒷사람을 밀어버린다.", effects: { respect: -10, care: -8 } }
+            ]
+        },
+        {
+            text: "점심시간 전, 반 단톡방에 친구 험담이 올라왔어. 분위기가 안 좋아.",
+            image: "./images/bg_07.jpg",
+            choices: [
+                { text: "'이런 말은 친구가 상처받을 거야'라고 보낸다.", effects: { mind: 12, respect: 10 } },
+                { text: "아무 말 없이 조용히 방을 나간다.", effects: { mind: -2 } },
+                { text: "재미있다는 듯이 'ㅋㅋㅋ'을 남긴다.", effects: { respect: -15, care: -15 } }
+            ]
+        },
+        {
+            text: "모둠 활동 시간. 한 친구가 의견을 내지 않고 가만히 있어.",
+            image: "./images/bg_08.jpg",
+            choices: [
+                { text: "'네 생각은 어때? 궁금해'라고 물어본다.", effects: { coop: 12, care: 8 } },
+                { text: "그 친구 몫까지 내가 다 해버린다.", effects: { coop: -3, mind: 5 } },
+                { text: "참여 안 한다고 선생님께 이른다.", effects: { care: -5, coop: -8 } }
+            ]
+        },
+        {
+            text: "급식 시간. 내가 제일 좋아하는 반찬이 나왔는데 딱 하나 남았어!",
+            image: "./images/bg_09.jpg",
+            choices: [
+                { text: "뒷 친구에게 '너 먹을래?' 양보한다.", effects: { care: 12, mind: 8 } },
+                { text: "가위바위보로 정하자고 제안한다.", effects: { respect: 5, coop: 5 } },
+                { text: "내가 잽싸게 집어서 먹는다.", effects: { care: -5 } }
+            ]
+        },
+        {
+            text: "친한 친구와 사소한 일로 다퉜어. 마음이 불편해.",
+            image: "./images/bg_10.jpg",
+            choices: [
+                { text: "쪽지에 '아까 미안했어'라고 써서 건넨다.", effects: { mind: 10, coop: 8 } },
+                { text: "친구가 먼저 사과할 때까지 기다린다.", effects: { mind: -3 } },
+                { text: "다른 친구들에게 그 친구 흉을 본다.", effects: { respect: -12, coop: -10 } }
+            ]
+        },
+        {
+            text: "청소 시간. 내 담당 구역 청소가 끝났는데, 칠판 당번이 힘들어 보여.",
+            image: "./images/bg_11.jpg",
+            choices: [
+                { text: "가서 칠판 지우는 것을 도와준다.", effects: { coop: 10, care: 10 } },
+                { text: "'힘내!'라고 말해주고 내 자리에 앉는다.", effects: { care: 3 } },
+                { text: "내 할 일 끝났으니 집에 갈 준비나 한다.", effects: { coop: -5 } }
+            ]
+        },
+        {
+            text: "하교 후 집에 돌아와 오늘 하루를 떠올려 본다. 어떤 하루였을까?",
+            image: "./images/bg_12.jpg",
+            choices: [
+                { text: "오늘 실수한 건 고치고 내일은 더 잘해야지!", effects: { mind: 10, respect: 5 } },
+                { text: "피곤했다. 그냥 빨리 자야지.", effects: { mind: 3 } },
+                { text: "학교 다니기 싫다... 짜증만 났어.", effects: { mind: -5 } }
+            ]
+        }
+    ];
+
+    // --- 게임 로직 ---
+
+    function selectChar(charId) {
+        player.char = charId;
+        document.querySelectorAll('.char-option').forEach(el => el.classList.remove('selected'));
+        document.getElementById('char-' + charId).classList.add('selected');
+    }
+
+    function startGame() {
+        const nameInput = document.getElementById('player-name').value;
+        if (!nameInput) {
+            alert("이름을 입력해줘!");
+            return;
+        }
+        if (!player.char) {
+            alert("캐릭터를 선택해줘!");
+            return;
+        }
+        player.name = nameInput;
+        
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        
+        renderScene();
+    }
+
+    function updateStats(effects) {
+        for (let key in effects) {
+            const change = effects[key];
+            stats[key] += change;
+            
+            // 범위 제한 (0~100)
+            if (stats[key] > 100) stats[key] = 100;
+            if (stats[key] < 0) stats[key] = 0;
+            
+            // UI 업데이트
+            const bar = document.getElementById(`bar-${key}`);
+            const val = document.getElementById(`val-${key}`);
+            
+            // 게이지바 길이
+            bar.style.width = stats[key] + '%';
+            // 숫자 텍스트
+            val.innerText = stats[key];
+
+            // --- 점수 변동 효과 (플로팅 텍스트) ---
+            showFloatingText(key, change);
+        }
+    }
+
+    // +10, -5 같은 텍스트를 띄우는 함수
+    function showFloatingText(key, change) {
+        if (change === 0) return;
+
+        const statBox = document.getElementById(`stat-box-${key}`);
+        const floatEl = document.createElement('span');
+        
+        floatEl.className = 'stat-float ' + (change > 0 ? 'plus' : 'minus');
+        floatEl.innerText = (change > 0 ? '+' : '') + change;
+        
+        statBox.appendChild(floatEl);
+
+        // 애니메이션 후 삭제
+        setTimeout(() => {
+            floatEl.remove();
+        }, 1000);
+    }
+
+    // 나쁜 선택 시 화면 효과
+    function triggerEffect(effects) {
+        const isBad = Object.values(effects).some(val => val <= -5);
+        if (isBad) {
+            document.body.classList.add('dark-mood');
+            setTimeout(() => {
+                document.body.classList.remove('dark-mood');
+            }, 500);
+        }
+    }
+
+    function renderScene() {
+        const scene = scenes[currentScene];
+        const imgEl = document.getElementById('scene-img');
+        const boxEl = document.getElementById('scene-box');
+        
+        // 초기화 (줌 효과 제거 및 투명도)
+        boxEl.classList.remove('zoom-in');
+        imgEl.style.opacity = 0;
+        
+        setTimeout(() => {
+            imgEl.src = scene.image;
+            document.getElementById('scene-text').textContent = scene.text;
+            
+            const choicesContainer = document.getElementById('choices-container');
+            choicesContainer.innerHTML = '';
+            
+            // 줌인 효과 시작
+            boxEl.classList.add('zoom-in');
+
+            scene.choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-choice';
+                btn.textContent = choice.text;
+                
+                // 버튼 클릭 이벤트
+                btn.onclick = () => {
+                    // 중복 클릭 방지: 모든 버튼 비활성화
+                    const allBtns = document.querySelectorAll('.btn-choice');
+                    allBtns.forEach(b => b.disabled = true);
+
+                    // 스탯 업데이트 및 시각 효과
+                    updateStats(choice.effects);
+                    triggerEffect(choice.effects);
+
+                    // 1초 딜레이 후 다음 장면으로 이동 (점수 변화 확인 시간)
+                    setTimeout(() => {
+                        nextScene();
+                    }, 1000); 
+                };
+                choicesContainer.appendChild(btn);
+            });
+            
+            imgEl.style.opacity = 1;
+        }, 200);
+    }
+
+    function nextScene() {
+        currentScene++;
+        if (currentScene < scenes.length) {
+            renderScene();
+        } else {
+            showEnding();
+        }
+    }
+
+    // --- 엔딩 로직 ---
+    function showEnding() {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('ending-screen').classList.remove('hidden');
+
+        const totalScore = stats.care + stats.respect + stats.coop + stats.mind;
+        
+        const sortedStats = Object.entries(stats).sort((a, b) => b[1] - a[1]);
+        const maxStat = sortedStats[0];    
+        const minStat = sortedStats[3];    
+
+        let endingType = "";
+        let endingTitle = "";
+        let endingDesc = "";
+        let endingImgSrc = "";
+
+        if (totalScore >= 280) {
+            endingType = "happy";
+            endingImgSrc = "./images/ending_happy.jpg";
+            switch(maxStat[0]) {
+                case 'care': endingTitle = "모두에게 믿음받는 친구"; endingDesc = "너의 따뜻한 배려 덕분에 교실이 훈훈해졌어!\n친구들은 네가 있어서 정말 든든하다고 생각해."; break;
+                case 'respect': endingTitle = "책임감 있는 멋진 리더"; endingDesc = "상대방을 존중하는 너의 태도가 빛났어.\n선생님도 친구들도 너를 아주 멋지게 보고 있어!"; break;
+                case 'coop': endingTitle = "함께 만드는 우리 교실"; endingDesc = "혼자보다 '함께'를 선택한 너!\n너 덕분에 우리 반은 최고의 팀워크를 가지게 되었어."; break;
+                case 'mind': endingTitle = "마음이 단단한 어린이"; endingDesc = "어려운 상황에서도 긍정적인 마음을 잃지 않았구나.\n너의 건강한 마음이 앞으로의 학교생활을 지켜줄 거야."; break;
+            }
+        } else if (totalScore >= 240) {
+            endingType = "mid";
+            endingImgSrc = "./images/ending_mid.jpg";
+            switch(maxStat[0]) {
+                case 'care': endingTitle = "조금만 더 다가가면"; endingDesc = "친구를 생각하는 마음은 정말 예뻐.\n하지만 조금 더 용기를 내서 표현했다면 어땠을까?"; break;
+                case 'respect': endingTitle = "착하지만 망설였던 하루"; endingDesc = "예의 바른 모습은 좋았지만,\n가끔은 네 생각을 더 확실하게 말해도 괜찮아!"; break;
+                case 'coop': endingTitle = "마음은 있었지만..."; endingDesc = "도와주고 싶은 마음은 가득했지?\n다음에는 생각만 하지 말고 손을 먼저 내밀어 보자."; break;
+                case 'mind': endingTitle = "흔들리는 새싹"; endingDesc = "오늘 하루 잘 버텼어!\n하지만 힘든 일이 있을 땐 혼자 끙끙 앓지 말고 도움을 청해봐."; break;
+            }
+        } else {
+            endingType = "bad";
+            endingImgSrc = "./images/ending_bad.jpg";
+            switch(minStat[0]) {
+                case 'care': endingTitle = "조금 외로운 교실"; endingDesc = "나만 생각하다 보니 친구들이 멀어진 것 같아.\n내일은 친구에게 먼저 사탕 하나 건네보는 건 어때?"; break;
+                case 'respect': endingTitle = "흔들리는 교실"; endingDesc = "장난이 너무 심했나 봐.\n예의를 지키는 것이 쿨하고 멋진 거라는 걸 잊지 마!"; break;
+                case 'coop': endingTitle = "서로 멀어진 우리"; endingDesc = "혼자가 편할 수도 있지만,\n학교는 같이 생활하는 곳이라는 걸 기억해줘."; break;
+                case 'mind': endingTitle = "마음이 지친 하루"; endingDesc = "짜증 내고 피하기만 하니 마음이 더 힘들지?\n내일은 긍정적인 마음으로 다시 시작해보자!"; break;
+            }
+        }
+
+        document.getElementById('ending-img').src = endingImgSrc;
+        document.getElementById('ending-title').innerText = endingTitle;
+        document.getElementById('ending-desc').innerText = endingDesc;
+        document.getElementById('final-name').innerText = player.name;
+        document.getElementById('total-score').innerText = totalScore;
+    }
+
+    function saveEndingImage() {
+        const element = document.getElementById("ending-card");
+        
+        html2canvas(element, { useCORS: true }).then(canvas => {
+            const link = document.createElement("a");
+            link.download = `${player.name}_학교생활결과.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            
+            const toast = document.getElementById('toast');
+            toast.style.opacity = 1;
+            setTimeout(() => { toast.style.opacity = 0; }, 2000);
+        });
+    }
+</script>
+
+</body>
+</html>
