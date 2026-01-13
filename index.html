@@ -32,7 +32,6 @@
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            /* 모바일 브라우저 높이 대응 (동적 뷰포트 높이) */
             height: 100dvh; 
             overflow: hidden; 
             touch-action: manipulation;
@@ -58,7 +57,6 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            /* 핵심 수정: 내용물을 화면 세로로 균등 분배 */
             justify-content: space-evenly;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
@@ -68,7 +66,7 @@
         .btn {
             background: var(--primary-color);
             border: none;
-            padding: 15px 20px; /* 터치 영역 넉넉하게 */
+            padding: 15px 20px;
             font-size: 1.2rem;
             border-radius: 25px;
             cursor: pointer;
@@ -95,7 +93,7 @@
             text-align: left;
             font-size: 1.1rem;
             line-height: 1.4;
-            padding: 12px 20px; /* 선택지 내부 여백 */
+            padding: 12px 20px;
         }
         .btn-choice:hover:not(:disabled) {
             background: #fff9db;
@@ -104,22 +102,17 @@
         /* 1. 시작 화면 */
         #start-screen {
             background: linear-gradient(180deg, #fff 0%, #e6f7ff 100%);
-            /* 요소 간 간격을 균등하게 벌림 */
             justify-content: space-evenly; 
         }
 
-        .title-box { 
-            width: 100%;
-        }
+        .title-box { width: 100%; }
         .title-box h1 {
             font-size: 2.5rem; 
             color: #4D96FF;
             text-shadow: 2px 2px 0 #fff;
             line-height: 1.3;
         }
-        .input-group { 
-            width: 100%; 
-        }
+        .input-group { width: 100%; }
         input[type="text"] {
             width: 100%;
             padding: 14px;
@@ -158,7 +151,8 @@
         /* 2. 게임 화면 헤더 */
         #game-header {
             width: 100%;
-            padding: 10px 15px;
+            /* 수정됨: 상단 패딩을 30px로 늘려 여백 확보 */
+            padding: 30px 15px 10px 15px; 
             background: rgba(255,255,255,0.98);
             z-index: 50;
             border-bottom: 1px solid #eee;
@@ -166,9 +160,8 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            /* 헤더는 고정 높이 대신 내용물에 맞춤 */
             flex-shrink: 0; 
-            min-height: 80px;
+            min-height: 90px;
         }
         
         .player-info-area {
@@ -231,6 +224,7 @@
             font-size: 0.85rem;
         }
 
+        /* 수정됨: 애니메이션 시간 1초로 복구 */
         .stat-float {
             position: absolute;
             right: 35px;
@@ -238,7 +232,7 @@
             font-weight: bold;
             font-size: 1.1rem;
             pointer-events: none;
-            animation: floatUp 2s ease-out forwards;
+            animation: floatUp 1s ease-out forwards; 
             text-shadow: 1px 1px 0 #fff;
             z-index: 100;
         }
@@ -249,20 +243,17 @@
         .plus { color: #2ecc71; }
         .minus { color: #e74c3c; }
 
-        /* 게임 장면 영역: 균등 분배의 핵심 */
         #scene-area {
             flex: 1;
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 이미지, 텍스트, 버튼 사이 간격을 균등하게 */
             justify-content: space-evenly;
             padding-bottom: 10px;
         }
         .scene-img-box {
             width: 100%;
-            /* 화면 비율에 따라 유동적으로 변하되 최대 높이 제한 */
             flex-grow: 1; 
             max-height: 250px; 
             min-height: 180px;
@@ -307,9 +298,7 @@
         .dark-mood .dark-overlay { opacity: 1; }
 
         /* 3. 엔딩 화면 */
-        #ending-screen {
-             justify-content: space-evenly;
-        }
+        #ending-screen { justify-content: space-evenly; }
         #ending-card {
             background: white;
             padding: 20px;
@@ -318,9 +307,8 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            /* 카드 내부 요소들도 균등 분배 */
             flex-grow: 1;
-            max-height: 70%; /* 너무 길어지지 않게 */
+            max-height: 70%;
             justify-content: space-between;
             margin-bottom: 20px;
         }
@@ -341,6 +329,7 @@
             opacity: 0;
             transition: opacity 0.3s;
             z-index: 100;
+            pointer-events: none; 
         }
     </style>
 </head>
@@ -349,19 +338,16 @@
 <div id="app">
     <!-- 1. 시작 화면 -->
     <div id="start-screen" class="screen">
-        <!-- 타이틀 -->
         <div class="title-box">
             <p style="font-size: 1.2rem; margin-bottom: 5px;">두근두근 새학기</p>
             <h1>나의 학교생활<br>선택 게임</h1>
         </div>
 
-        <!-- 이름 입력 -->
         <div class="input-group">
             <p style="margin-bottom: 10px;">이름을 알려줘!</p>
             <input type="text" id="player-name" placeholder="이름 입력" maxlength="6">
         </div>
 
-        <!-- 캐릭터 선택 -->
         <div class="input-group">
             <p style="margin-bottom: 10px;">캐릭터를 선택해줘!</p>
             <div class="char-select">
@@ -372,7 +358,6 @@
             </div>
         </div>
 
-        <!-- 시작 버튼 -->
         <div style="width: 100%;">
             <button class="btn" onclick="startGame()">등교하기!</button>
         </div>
@@ -381,13 +366,11 @@
     <!-- 2. 게임 진행 화면 -->
     <div id="game-screen" class="screen hidden">
         <div id="game-header">
-            <!-- 캐릭터 정보 표시 영역 -->
             <div class="player-info-area">
                 <div id="header-char-img" class="header-char-img"></div>
                 <span id="header-player-name" class="header-player-name"></span>
             </div>
 
-            <!-- 스탯 게이지바 -->
             <div class="stat-container">
                 <div class="stat-item" id="stat-box-care">
                     <span class="stat-label">배려</span>
@@ -443,7 +426,8 @@
         
         <div style="width: 100%;">
             <button class="btn" onclick="saveEndingImage()">📸 추억 저장하기</button>
-            <button class="btn" style="background-color: #eee;" onclick="location.reload()">🔄 처음부터 다시하기</button>
+            <!-- 수정됨: 작동하지 않던 reload 대신 resetGame 함수 호출 -->
+            <button class="btn" style="background-color: #eee;" onclick="resetGame()">🔄 처음부터 다시하기</button>
         </div>
     </div>
     
@@ -461,7 +445,7 @@
     const scenes = [
         {
             text: "새학기 첫 등교길! 학교 앞 횡단보도에서 저학년 동생이 실내화 가방을 떨어뜨렸어. 어떻게 할까?",
-            image: "./images/bg_01.png",
+            image: "./images/bg_01.jpg",
             choices: [
                 { text: "얼른 뛰어가서 같이 주워준다.", effects: { care: 10, mind: 5 } },
                 { text: "뒤에 차가 오는지 봐주며 기다려준다.", effects: { care: 5, respect: 3 } },
@@ -470,7 +454,7 @@
         },
         {
             text: "교실에 들어왔어. 담임 선생님이 반갑게 인사를 건네시네?",
-            image: "./images/bg_02.png",
+            image: "./images/bg_02.jpg",
             choices: [
                 { text: "큰 소리로 '안녕하세요!' 배꼽 인사를 한다.", effects: { respect: 10, mind: 5 } },
                 { text: "눈을 마주치며 가볍게 목례한다.", effects: { respect: 5 } },
@@ -479,7 +463,7 @@
         },
         {
             text: "1교시 수업 시간, 선생님 말씀이 조금 어렵네. 집중이 잘 안 되는데...",
-            image: "./images/bg_03.png",
+            image: "./images/bg_03.jpg",
             choices: [
                 { text: "허리를 펴고 선생님 눈을 보며 끝까지 듣는다.", effects: { respect: 10, mind: 5 } },
                 { text: "중요한 내용만 노트에 끄적여 본다.", effects: { mind: 3 } },
@@ -488,7 +472,7 @@
         },
         {
             text: "쉬는 시간! 복도에서 친구들이 뛰어다니며 장난을 치고 있어.",
-            image: "./images/bg_04.png",
+            image: "./images/bg_04.jpg",
             choices: [
                 { text: "'얘들아, 복도에서는 조용히 걷자'고 말한다.", effects: { coop: 10, respect: 5 } },
                 { text: "부딪히지 않게 조심히 피해 다닌다.", effects: { care: 3 } },
@@ -497,7 +481,7 @@
         },
         {
             text: "간식 시간, 짝꿍이 우유를 책상에 쏟았어! 어쩌지?",
-            image: "./images/bg_05.png",
+            image: "./images/bg_05.jpg",
             choices: [
                 { text: "내 휴지를 꺼내서 같이 닦아준다.", effects: { care: 12, coop: 8 } },
                 { text: "선생님께 말씀드리고 걸레를 가져온다.", effects: { coop: 5, care: 5 } },
@@ -506,7 +490,7 @@
         },
         {
             text: "체육관으로 이동하는 시간. 줄을 서서 가야 하는데 자꾸 뒤에서 미네.",
-            image: "./images/bg_06.png",
+            image: "./images/bg_06.jpg",
             choices: [
                 { text: "뒤를 돌아보며 '밀지 말고 천천히 가자'고 한다.", effects: { respect: 8, coop: 5 } },
                 { text: "아무 말 없이 내 앞사람과의 간격을 지킨다.", effects: { mind: 5 } },
@@ -515,7 +499,7 @@
         },
         {
             text: "점심시간 전, 반 단톡방에 친구 험담이 올라왔어. 분위기가 안 좋아.",
-            image: "./images/bg_07.png",
+            image: "./images/bg_07.jpg",
             choices: [
                 { text: "'이런 말은 친구가 상처받을 거야'라고 보낸다.", effects: { mind: 12, respect: 10 } },
                 { text: "아무 말 없이 조용히 방을 나간다.", effects: { mind: -2 } },
@@ -524,7 +508,7 @@
         },
         {
             text: "모둠 활동 시간. 한 친구가 의견을 내지 않고 가만히 있어.",
-            image: "./images/bg_08.png",
+            image: "./images/bg_08.jpg",
             choices: [
                 { text: "'네 생각은 어때? 궁금해'라고 물어본다.", effects: { coop: 12, care: 8 } },
                 { text: "그 친구 몫까지 내가 다 해버린다.", effects: { coop: -3, mind: 5 } },
@@ -533,7 +517,7 @@
         },
         {
             text: "급식 시간. 내가 제일 좋아하는 반찬이 나왔는데 딱 하나 남았어!",
-            image: "./images/bg_09.png",
+            image: "./images/bg_09.jpg",
             choices: [
                 { text: "뒷 친구에게 '너 먹을래?' 양보한다.", effects: { care: 12, mind: 8 } },
                 { text: "가위바위보로 정하자고 제안한다.", effects: { respect: 5, coop: 5 } },
@@ -542,7 +526,7 @@
         },
         {
             text: "친한 친구와 사소한 일로 다퉜어. 마음이 불편해.",
-            image: "./images/bg_10.png",
+            image: "./images/bg_10.jpg",
             choices: [
                 { text: "쪽지에 '아까 미안했어'라고 써서 건넨다.", effects: { mind: 10, coop: 8 } },
                 { text: "친구가 먼저 사과할 때까지 기다린다.", effects: { mind: -3 } },
@@ -551,7 +535,7 @@
         },
         {
             text: "청소 시간. 내 담당 구역 청소가 끝났는데, 칠판 당번이 힘들어 보여.",
-            image: "./images/bg_11.png",
+            image: "./images/bg_11.jpg",
             choices: [
                 { text: "가서 칠판 지우는 것을 도와준다.", effects: { coop: 10, care: 10 } },
                 { text: "'힘내!'라고 말해주고 내 자리에 앉는다.", effects: { care: 3 } },
@@ -560,7 +544,7 @@
         },
         {
             text: "하교 후 집에 돌아와 오늘 하루를 떠올려 본다. 어떤 하루였을까?",
-            image: "./images/bg_12.png",
+            image: "./images/bg_12.jpg",
             choices: [
                 { text: "오늘 실수한 건 고치고 내일은 더 잘해야지!", effects: { mind: 10, respect: 5 } },
                 { text: "피곤했다. 그냥 빨리 자야지.", effects: { mind: 3 } },
@@ -577,6 +561,7 @@
         document.getElementById('char-' + charId).classList.add('selected');
     }
 
+    // 수정됨: 게임 시작 시 스탯을 초기화하고 UI를 업데이트하도록 수정
     function startGame() {
         const nameInput = document.getElementById('player-name').value;
         if (!nameInput) {
@@ -589,6 +574,15 @@
         }
         player.name = nameInput;
         
+        // 게임 상태 초기화
+        currentScene = 0;
+        stats = { care: 50, respect: 50, coop: 50, mind: 50 };
+        // UI 초기화 (재시작 시 필요)
+        ['care', 'respect', 'coop', 'mind'].forEach(key => {
+            document.getElementById(`bar-${key}`).style.width = '50%';
+            document.getElementById(`val-${key}`).innerText = '50';
+        });
+        
         // 헤더에 캐릭터 정보 반영
         document.getElementById('header-player-name').innerText = player.name;
         document.getElementById('header-char-img').style.backgroundImage = `url('./images/char_${player.char}.png')`;
@@ -597,6 +591,17 @@
         document.getElementById('game-screen').classList.remove('hidden');
         
         renderScene();
+    }
+
+    // 수정됨: 다시하기 기능을 위한 리셋 함수 추가
+    function resetGame() {
+        document.getElementById('ending-screen').classList.add('hidden');
+        document.getElementById('start-screen').classList.remove('hidden');
+        
+        // 입력창 및 선택 초기화
+        document.getElementById('player-name').value = '';
+        player = { name: "", char: "" };
+        document.querySelectorAll('.char-option').forEach(el => el.classList.remove('selected'));
     }
 
     function updateStats(effects) {
@@ -619,6 +624,7 @@
         }
     }
 
+    // 수정됨: 사라지는 시간 1초로 복구
     function showFloatingText(key, change) {
         if (change === 0) return;
 
@@ -632,7 +638,7 @@
 
         setTimeout(() => {
             floatEl.remove();
-        }, 2000);
+        }, 1000); 
     }
 
     function triggerEffect(effects) {
@@ -667,6 +673,7 @@
                 btn.className = 'btn btn-choice';
                 btn.textContent = choice.text;
                 
+                // 수정됨: 다음 장면 대기시간 1초로 복구
                 btn.onclick = () => {
                     const allBtns = document.querySelectorAll('.btn-choice');
                     allBtns.forEach(b => b.disabled = true);
@@ -676,7 +683,7 @@
 
                     setTimeout(() => {
                         nextScene();
-                    }, 2000); 
+                    }, 1000); 
                 };
                 choicesContainer.appendChild(btn);
             });
@@ -711,7 +718,7 @@
 
         if (totalScore >= 280) {
             endingType = "happy";
-            endingImgSrc = "./images/ending_happy.png";
+            endingImgSrc = "./images/ending_happy.jpg";
             switch(maxStat[0]) {
                 case 'care': endingTitle = "모두에게 믿음받는 친구"; endingDesc = "너의 따뜻한 배려 덕분에 교실이 훈훈해졌어!\n친구들은 네가 있어서 정말 든든하다고 생각해."; break;
                 case 'respect': endingTitle = "책임감 있는 멋진 리더"; endingDesc = "상대방을 존중하는 너의 태도가 빛났어.\n선생님도 친구들도 너를 아주 멋지게 보고 있어!"; break;
@@ -720,7 +727,7 @@
             }
         } else if (totalScore >= 240) {
             endingType = "mid";
-            endingImgSrc = "./images/ending_mid.png";
+            endingImgSrc = "./images/ending_mid.jpg";
             switch(maxStat[0]) {
                 case 'care': endingTitle = "조금만 더 다가가면"; endingDesc = "친구를 생각하는 마음은 정말 예뻐.\n하지만 조금 더 용기를 내서 표현했다면 어땠을까?"; break;
                 case 'respect': endingTitle = "착하지만 망설였던 하루"; endingDesc = "예의 바른 모습은 좋았지만,\n가끔은 네 생각을 더 확실하게 말해도 괜찮아!"; break;
@@ -729,7 +736,7 @@
             }
         } else {
             endingType = "bad";
-            endingImgSrc = "./images/ending_bad.png";
+            endingImgSrc = "./images/ending_bad.jpg";
             switch(minStat[0]) {
                 case 'care': endingTitle = "조금 외로운 교실"; endingDesc = "나만 생각하다 보니 친구들이 멀어진 것 같아.\n내일은 친구에게 먼저 사탕 하나 건네보는 건 어때?"; break;
                 case 'respect': endingTitle = "흔들리는 교실"; endingDesc = "장난이 너무 심했나 봐.\n예의를 지키는 것이 쿨하고 멋진 거라는 걸 잊지 마!"; break;
@@ -763,4 +770,3 @@
 
 </body>
 </html>
-
